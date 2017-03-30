@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const morgon = require('morgan');
 const bodyParser = require('body-parser');
-const {blogPost} = require('./models');
+const {BlogPost} = require('./models');
 const blogRouter = require('./blogRouter');
 const app = express();
 
