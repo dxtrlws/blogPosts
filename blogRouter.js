@@ -7,7 +7,9 @@ const bodyparser = require('body-parser');
 const jasonParser = bodyparser.json();
 const {BlogPosts} = require('./models');
 
-BlogPosts.create('My First Post', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam elementum dolor metus, placerat facilisis lorem placerat eu. Curabitur hendrerit rhoncus egestas. Vestibulum sed felis eget purus faucibus placerat nec sit amet risus. Vestibulum finibus volutpat leo sit amet ornare. Praesent augue diam, sodales non nunc ut, mattis molestie elit. Nam aliquet porttitor neque nec sodales. Integer posuere tellus vitae commodo consectetur. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin ullamcorper erat vitae nulla luctus lobortis. Aliquam sollicitudin ac sem sit amet scelerisque. Etiam sem tellus, efficitur nec viverra sed, lobortis sit amet elit. Nullam facilisis egestas consequat. In a magna non lectus cursus interdum. Ut id dui magna. Nulla eros justo, consectetur in elementum a, ullamcorper in urna \nCurabitur aliquam, odio sagittis faucibus feugiat, augue elit congue nibh, non tempor dolor nunc non diam. Sed ex quam, maximus ac nisi id, congue elementum neque. Mauris tincidunt magna sem, efficitur euismod nunc auctor rutrum. Curabitur commodo laoreet urna ut pulvinar. Praesent varius turpis vel quam pulvinar dapibus. Ut facilisis nunc tincidunt velit luctus congue. Aliquam tortor libero, ullamcorper congue libero eget, ornare finibus lectus. Nam semper convallis risus, eget vulputate augue ullamcorper non. Integer scelerisque facilisis ligula vel cursus. Morbi diam ipsum, luctus in justo eu, pretium pellentesque libero. In libero urna, pulvinar sit amet dolor at, hendrerit viverra magna. Maecenas fringilla, nunc et sagittis ornare, nisi ex sagittis neque, sit amet sodales neque nulla vel tortor. Vivamus sed nunc libero. Etiam dui purus, rutrum quis mi ut, placerat bibendum turpis. Donec consequat erat quam, quis facilisis dui vestibulum in.', 'Dexter Lewis');
+BlogPosts.create('My First Post', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam elementum dolor metus, placerat facilisis lorem placerat eu. Curabitur hendrerit rhoncus egestas. Vestibulum sed felis eget purus faucibus placerat nec sit amet risus. Vestibulum finibus volutpat leo sit amet ornare. Praesent augue diam, sodales non nunc ut, mattis molestie elit. Nam aliquet porttitor neque nec sodales. Integer posuere tellus vitae commodo consectetur. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proi.', 'Dexter Lewis');
+BlogPosts.create('My Second Post', 'Blog content', 'Dexter Lewis');
+
 
 //send back response to retrieve all blog entries
 router.get('/', (req, res)=> {
@@ -19,6 +21,52 @@ router.delete('/:id', (req, res)=> {
    console.log(`Deleted blog item ${req.params.id}`);
    res.status(204).end();
 });
+
+router.post ('/', jasonParser, (req, res) =>{
+   const requiredFields = ['title', 'content', 'author', 'publishDate'];
+   for (let i = 0;  i < requiredFields.length;  i++ ) {
+       const field = requiredFields[i];
+       if (!(field in req.body)) {
+           const message = `Missing ${field} in request body`;
+           console.error(message);
+           return res.status(400).send(message);
+       }
+   }
+    const blogEntry = BlogPosts.create(req.body.title, req.body.content, req.body.author, req.body.publishDate);
+   res.status(201).json(blogEntry);
+});
+
+router.put ('/:id', jasonParser, (req, res) => {
+    const requireFields = ['title', 'content', 'author', 'publishDate'];
+    for (let i=0; i< requireFields.length; i++) {
+        const field = requireFields[i];
+        if (!(field in req.body)) {
+            const message = `Missing ${field} in request body`;
+            console.error(message);
+            return res.status(400).send(message);
+        }
+    }
+   if (req.params.id !== req.body.id) {
+        const message = (
+            `Request path id (${req.params.id} and request body id`
+            `(${req.body.id} must match`);
+        console.error(message);
+        return res.status(400).send(message);
+   }
+   console.log(`Updating blog entry ( ${req.params.id}`);
+   const  updateEntry = BlogPosts.update( {
+       id: req.params.id,
+       name: req.body.name,
+       content: req.body.content,
+       author: req.body.author,
+       publishDate: req.body.publishDate
+   });
+    res.status(204).jason(updateEntry);
+
+
+});
+
+
 
 
 module.exports = router;
